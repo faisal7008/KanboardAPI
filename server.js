@@ -27,6 +27,8 @@ app.listen(port, () => {
 connectDB();
 
 const authRouter = require("./routes/authRoutes");
+const boardRouter = require("./routes/boardRoutes");
 
 // routes
 app.use("/auth", authRouter)
+app.use("/api/boards", boardRouter)
