@@ -11,8 +11,8 @@ const taskSchema = new Schema(
       enum: ["Unassigned", "In Development", "Pending Review", "Done"],
       default: "Unassigned",
     },
-    assignedTo: { type: Schema.Types.ObjectId, ref: "User" },
-    deadline: { type: Date },
+    assignedTo: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    deadline: { type: Date, required: true },
   },
   { timestamps: true }
 );

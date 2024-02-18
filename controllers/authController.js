@@ -67,7 +67,7 @@ const handleGoogleCallback = async (req, res) => {
     res.redirect(`${process.env.CLIENT_URL}?token=${token}`)
   } catch (error) {
     console.error('Error verifying ID token:', error);
-    res.status(500).json({ message: 'Failed to verify ID token' });
+    res.status(500).json({ message: 'Failed to verify ID token', details: error.message });
   }
 }
 
@@ -87,7 +87,7 @@ const getUserProfile = async (req, res) => {
     return res.status(200).json(user);
   } catch (error) {
     console.error("Error fetching user profile:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error", details: error.message });
   }
 };
 
@@ -107,7 +107,7 @@ const googleLogout = async (req, res) => {
     res.status(200).json({ success: true, message: 'Google logout successful.' });
   } catch (error) {
     console.error('Error revoking access token:', error);
-    res.status(500).json({ success: false, message: 'Failed to logout from Google.' });
+    res.status(500).json({ success: false, message: 'Failed to logout from Google.', details: error.message });
   }
 };
 

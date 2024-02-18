@@ -21,7 +21,7 @@ const getHomeBoards = async (req, res) => {
     }
   } catch (error) {
     console.error("Error getting home boards:", error);
-    res.status(500).json({ message: "Failed to get home boards." });
+    res.status(500).json({ message: "Failed to get home boards.", details: error.message });
   }
 };
 
@@ -35,7 +35,7 @@ const getAllBoards = async (req, res) => {
     res.status(200).json({ boards });
   } catch (error) {
     console.error("Error getting all boards:", error);
-    res.status(500).json({ message: "Failed to get all boards." });
+    res.status(500).json({ message: "Failed to get all boards.", details: error.message });
   }
 };
 
@@ -68,7 +68,7 @@ const createBoard = async (req, res) => {
     res.status(201).json({ board });
   } catch (error) {
     console.error("Error creating board:", error);
-    res.status(500).json({ message: "Failed to create board." });
+    res.status(500).json({ message: "Failed to create board.", details: error.message });
   }
 };
 
@@ -110,7 +110,7 @@ const getOneBoard = async (req, res) => {
     res.status(200).json({ board });
   } catch (error) {
     console.error("Error getting board:", error);
-    res.status(500).json({ message: "Failed to get board." });
+    res.status(500).json({ message: "Failed to get board.", details: error.message });
   }
 };
 
@@ -138,7 +138,7 @@ const editBoard = async (req, res) => {
     res.status(200).json({ board });
   } catch (error) {
     console.error("Error editing board:", error);
-    res.status(500).json({ message: "Failed to edit board." });
+    res.status(500).json({ message: "Failed to edit board.", details: error.message });
   }
 };
 
@@ -168,7 +168,7 @@ const inviteUserToBoard = async (req, res) => {
     // Check if the user to be invited exists
     const invitedUser = await User.findById(invitedUserId).exec();
     if (!invitedUser) {
-      return res.status(404).json({ message: "Invited user not found." });
+      return res.status(404).json({ message: "Invited user not found.", details: error.message });
     }
 
     // Add the invited user to the board's members list
