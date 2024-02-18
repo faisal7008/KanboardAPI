@@ -28,7 +28,11 @@ connectDB();
 
 const authRouter = require("./routes/authRoutes");
 const boardRouter = require("./routes/boardRoutes");
+const taskRouter = require("./routes/taskRoutes");
 
-// routes
-app.use("/auth", authRouter)
-app.use("/api/boards", boardRouter)
+// Routes
+app.use("/auth", authRouter);
+app.use("/api/boards", boardRouter);
+
+// Nested route for tasks under a specific board
+app.use("/api/boards/:boardId/tasks", taskRouter);
