@@ -1,11 +1,10 @@
 const Board = require("../models/Board");
 const User = require("../models/User");
 
-// Function to get the user's last 3 visited Kanban Boards
+// To get the user's last 3 visited Kanban Boards
 const getHomeBoards = async (req, res) => {
   try {
-    // Get the user's recently visited boards from the database
-    const userId = req.userId; // Assuming userId is attached to req object by verifyToken middleware
+    const userId = req.userId; // check verifyToken middleware
     const user = await User.findById(userId)
       .populate("recentlyVisitedBoards", "_id name")
       .exec();
@@ -26,11 +25,10 @@ const getHomeBoards = async (req, res) => {
   }
 };
 
-// Function to get all Kanban Boards that the user belongs to
+// To get all Kanban Boards that the user belongs to
 const getAllBoards = async (req, res) => {
   try {
-    // Get all boards where the user is a member
-    const userId = req.userId; // Assuming userId is attached to req object by verifyToken middleware
+    const userId = req.userId; // check verifyToken middleware
     const boards = await Board.find({ members: userId })
       .populate("createdBy", "_id name")
       .exec();
@@ -41,10 +39,10 @@ const getAllBoards = async (req, res) => {
   }
 };
 
-// Function to create a new Kanban Board
+// To create a new Kanban Board
 const createBoard = async (req, res) => {
   try {
-    const userId = req.userId; // Assuming userId is attached to req object by verifyToken middleware
+    const userId = req.userId; // check verifyToken middleware
 
     // Check if the user has already created a board
     const existingBoard = await Board.findOne({ createdBy: userId }).exec();
@@ -54,7 +52,6 @@ const createBoard = async (req, res) => {
         .json({ message: "You can create only one board." });
     }
 
-    // Assuming req.body contains necessary information to create a new board
     const { boardName } = req.body;
 
     if (!boardName) {
@@ -75,13 +72,13 @@ const createBoard = async (req, res) => {
   }
 };
 
-// Function to get a single Kanban Board
+// To get a single Kanban Board
 const getOneBoard = async (req, res) => {
   try {
-    const userId = req.userId; // Assuming userId is attached to req object by verifyToken middleware
-    const { boardId } = req.params; // Extract boardId from route parameters
+    const userId = req.userId; // check verifyToken middleware
+    const { boardId } = req.params;
 
-    // Find the board document by ID
+    // Find the board by ID
     const board = await Board.findById(boardId);
 
     if (!board) {
@@ -91,8 +88,8 @@ const getOneBoard = async (req, res) => {
     // Add the visited board ID to the recentlyVisitedBoards array of the user
     const user = await User.findById(userId);
 
+    // Add the visited board ID to the recentlyVisitedBoards array
     if (user) {
-      // Add the visited board ID to the recentlyVisitedBoards array
       if (user.recentlyVisitedBoards.includes(boardId)) {
         user.recentlyVisitedBoards.pull(boardId); // Remove boardId if it exists in the array
       }
@@ -102,10 +99,9 @@ const getOneBoard = async (req, res) => {
       // Limit the array to a maximum number of board IDs (e.g., 3)
       const maxRecentBoards = 3;
       if (user.recentlyVisitedBoards.length > maxRecentBoards) {
-        user.recentlyVisitedBoards.pop(); // Remove the oldest board ID
+        user.recentlyVisitedBoards.pop(); // Remove the oldest board ID from the end
       }
 
-      // Save the updated user document to the database
       await user.save();
     } else {
       console.error("User not found.");
@@ -118,16 +114,15 @@ const getOneBoard = async (req, res) => {
   }
 };
 
-// Function to edit a Kanban Board
+// To edit a Kanban Board
 const editBoard = async (req, res) => {
   try {
-    // Assuming req.params.boardId contains the ID of the board to be edited
     const boardId = req.params.boardId;
 
     if (!boardId) {
       return res.status(404).json({ message: "boardId is required." });
     }
-    // Assuming req.body contains necessary information to update the board
+
     const { name } = req.body;
 
     // Find the board by ID and update its name
@@ -136,6 +131,7 @@ const editBoard = async (req, res) => {
       { name },
       { new: true }
     ).exec();
+
     if (!board) {
       return res.status(404).json({ message: "Board not found." });
     }
@@ -146,12 +142,16 @@ const editBoard = async (req, res) => {
   }
 };
 
-// Function to invite a user to a Kanban Board
+// To invite a user to a Kanban Board
 const inviteUserToBoard = async (req, res) => {
   try {
+    const userId = req.userId; // check verifyToken middleware
     const boardId = req.params.boardId;
-    const userId = req.userId; // Assuming userId is attached to req object by verifyToken middleware
-    const { invitedUserId } = req.body; // Assuming req.body contains the ID of the user to be invited
+    const { invitedUserId } = req.body;
+
+    if (!invitedUserId) {
+        return res.status(404).json({ message: "invitedUserId is required." });
+    }
 
     // Check if the board exists and the user making the request is its creator
     const board = await Board.findOne({

@@ -9,25 +9,31 @@ const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const redirectUri = 'http://localhost:9000/auth/google/callback';
 
+// Create OAuth2Client instance with Google credentials
 const client = new OAuth2Client({
   clientId: googleClientId,
   clientSecret: googleClientSecret,
   redirectUri: redirectUri,
 });
 
+// To initiate Google Sign-In flow
 const googleLogin = (req, res) => {
+  // Generate authentication URL
   const authUrl = client.generateAuthUrl({
     access_type: 'offline',
     scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
   });
+  // Redirect to Google Sign-In
   res.redirect(authUrl);
 }
 
+// To handle Google Sign-In callback
 const handleGoogleCallback = async (req, res) => {
   try {
-    const code = req.query.code;
+    const code = req.query.code;  // Extract authorization code from request query
     const { tokens } = await client.getToken(code);
     // console.log(tokens)
+    // Verify ID token
     const userInfo = await client.verifyIdToken({
       idToken: tokens.id_token,
       audience: googleClientId
@@ -57,8 +63,7 @@ const handleGoogleCallback = async (req, res) => {
       expiresIn: 86400, // expires in 24 hours
     });
 
-    // Handle the user details as needed (e.g., store in database, authenticate user)
-    // res.status(200).json({ googleId, email, name, token });
+    // Redirect user to client URL with token as query parameter
     res.redirect(`${process.env.CLIENT_URL}?token=${token}`)
   } catch (error) {
     console.error('Error verifying ID token:', error);
@@ -66,10 +71,11 @@ const handleGoogleCallback = async (req, res) => {
   }
 }
 
-// get user profile
+// To get user profile
 const getUserProfile = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = req.userId; // check verifyToken middleware
+
     // Find the user by their ID in the database
     const user = await User.findById(userId);
 
@@ -85,10 +91,12 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-// Sign-out
+// For Google logout
 const googleLogout = async (req, res) => {
   try {
-    const accessToken = req.accessToken;
+    const accessToken = req.accessToken; // check verifyToken middleware
+
+    // Check if access token is provided
     if(!accessToken){
       return res.status(400).send({ message: "accessToken is required" });
     }
