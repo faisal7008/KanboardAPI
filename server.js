@@ -25,3 +25,8 @@ app.listen(port, () => {
 
 // Connect to the database
 connectDB();
+
+const authRouter = require("./routes/authRoutes");
+
+// routes
+app.use("/auth", authRouter)
