@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require('cors');
 require("dotenv").config();
 const { connectDB } = require("./config/db");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 
@@ -25,6 +26,17 @@ app.listen(port, () => {
 
 // Connect to the database
 connectDB();
+
+// Define rate limiting options
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 500, // 500 requests per windowMs
+  message: 'You have exceeded the 500 requests in 1 min limit!', 
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(limiter);
 
 const authRouter = require("./routes/authRoutes");
 const boardRouter = require("./routes/boardRoutes");
