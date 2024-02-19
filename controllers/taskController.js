@@ -56,6 +56,22 @@ const getBoardTasks = async (req, res) => {
   }
 };
 
+// To retrieve a specific task 
+const getOneTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+
+    // Find tasks belonging to the specified board
+    const task = await Task.findById(taskId);
+
+    res.status(200).json(task);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Failed to fetch a task", details: error.message });
+  }
+};
+
 // To update an existing task
 const updateTask = async (req, res) => {
   try {
@@ -91,4 +107,4 @@ const deleteTask = async (req, res) => {
   }
 };
 
-module.exports = { createTask, getBoardTasks, updateTask, deleteTask };
+module.exports = { createTask, getBoardTasks, getOneTask, updateTask, deleteTask };

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router({mergeParams: true}); // to access params from the parent router
-const { getBoardTasks, createTask, updateTask, deleteTask } = require('../controllers/taskController');
+const { getBoardTasks, createTask, updateTask, deleteTask, getOneTask } = require('../controllers/taskController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 
 // Route to get tasks for a specific board
@@ -14,6 +14,12 @@ router.get('/', verifyToken, getBoardTasks);
 // URL: /api/boards/:boardId/tasks/
 // Middleware: verifyToken (to verify authentication)
 router.post('/', verifyToken, createTask);
+
+// Route to retrieve a specific task
+// Method: GET
+// URL: /api/boards/:boardId/tasks/:taskId
+// Middleware: verifyToken (to verify authentication)
+router.get('/:taskId', verifyToken, getOneTask);
 
 // Route to update an existing task
 // Method: PUT
