@@ -1,4 +1,5 @@
 const Task = require("../models/Task");
+const redisClient = require("../redisClient");
 
 // To create a new task for a specific board
 const createTask = async (req, res) => {
@@ -16,7 +17,9 @@ const createTask = async (req, res) => {
       !assignedTo ||
       !deadline
     ) {
-      return res.status(400).json({ boardId, error: "Missing required fields" });
+      return res
+        .status(400)
+        .json({ boardId, error: "Missing required fields" });
     }
 
     // Create a new task instance
@@ -32,6 +35,10 @@ const createTask = async (req, res) => {
     // Save the task to the database
     await task.save();
 
+    // Clear the cached tasks
+    const tasksCacheKey = `tasks:${boardId}`;
+    redisClient.del(tasksCacheKey);
+
     res.status(201).json(task);
   } catch (error) {
     res
@@ -44,9 +51,19 @@ const createTask = async (req, res) => {
 const getBoardTasks = async (req, res) => {
   try {
     const { boardId } = req.params;
+    const tasksCacheKey = `tasks:${boardId}`;
 
+    // Check if data is cached
+    const cachedData = await redisClient.get(tasksCacheKey);
+    if (cachedData) {
+      // Data found in cache, return cached data
+      return res.status(200).json(JSON.parse(cachedData));
+    }
     // Find tasks belonging to the specified board
     const tasks = await Task.find({ board: boardId });
+
+    // Cache the fetched data
+    await redisClient.setex(tasksCacheKey, 3600, JSON.stringify(tasks)); // Cache for 1 hour
 
     res.status(200).json(tasks);
   } catch (error) {
@@ -56,14 +73,24 @@ const getBoardTasks = async (req, res) => {
   }
 };
 
-// To retrieve a specific task 
+// To retrieve a specific task
 const getOneTask = async (req, res) => {
   try {
     const { taskId } = req.params;
+    const taskCacheKey = `task:${taskId}`;
 
+    // Check if data is cached
+    const cachedData = await redisClient.get(taskCacheKey);
+    if (cachedData) {
+      // Data found in cache, return cached data
+      return res.status(200).json(JSON.parse(cachedData));
+    }
     // Find tasks belonging to the specified board
     const task = await Task.findById(taskId);
 
+    // Cache the fetched data
+    await redisClient.setex(taskCacheKey, 3600, JSON.stringify(task)); // Cache for 1 hour
+    
     res.status(200).json(task);
   } catch (error) {
     res
@@ -83,6 +110,10 @@ const updateTask = async (req, res) => {
     // Find and return the updated task
     const updatedTask = await Task.findById(taskId);
 
+    // Clear the cached task
+    const taskCacheKey = `task:${taskId}`;
+    redisClient.del(taskCacheKey);
+
     res.status(200).json(updatedTask);
   } catch (error) {
     res
@@ -99,6 +130,14 @@ const deleteTask = async (req, res) => {
     // Delete the task from the database
     await Task.findByIdAndDelete(taskId);
 
+    // Clear the cached task
+    const taskCacheKey = `task:${taskId}`;
+    redisClient.del(taskCacheKey);
+
+    // Clear the cached tasks
+    const tasksCacheKey = `tasks:${boardId}`;
+    redisClient.del(tasksCacheKey);
+
     res.status(200).json({ taskId, message: "Task deleted successfully." });
   } catch (error) {
     res
@@ -107,4 +146,10 @@ const deleteTask = async (req, res) => {
   }
 };
 
-module.exports = { createTask, getBoardTasks, getOneTask, updateTask, deleteTask };
+module.exports = {
+  createTask,
+  getBoardTasks,
+  getOneTask,
+  updateTask,
+  deleteTask,
+};
