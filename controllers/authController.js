@@ -7,7 +7,7 @@ const jwtSecret = process.env.JWT_SECRET;
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
-const redirectUri = 'http://localhost:9000/auth/google/callback';
+const redirectUri = process.env.REDIRECT_URI
 
 // Create OAuth2Client instance with Google credentials
 const client = new OAuth2Client({
