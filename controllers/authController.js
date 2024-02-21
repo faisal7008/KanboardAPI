@@ -123,4 +123,4 @@ const googleLogout = async (req, res) => {
 };
 
 
-module.exports = { googleLogin, handleGoogleCallback, getUserProfile, deleteProfile, googleLogout };
+module.exports = { googleLogin, handleGoogleCallback, getUserProfile, googleLogout };
