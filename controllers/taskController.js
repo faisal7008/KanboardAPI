@@ -125,7 +125,7 @@ const updateTask = async (req, res) => {
 // To delete an existing task
 const deleteTask = async (req, res) => {
   try {
-    const { taskId } = req.params;
+    const { boardId, taskId } = req.params;
 
     // Delete the task from the database
     await Task.findByIdAndDelete(taskId);
