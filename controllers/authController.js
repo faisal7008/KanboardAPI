@@ -27,6 +27,13 @@ const googleLogin = (req, res) => {
   res.redirect(authUrl);
 }
 
+const generateAvatar = () => {
+  const seed = ["Fluffy","Bella","Leo","Annie","Whiskers","Willow","Oliver","Midnight","Bandit","Pepper","Zoey","George","Sassy","Pumpkin","Zoe","Simon"]
+  // Generate a random index
+  const index = Math.floor(Math.random() * seed.length);
+  return `https://api.dicebear.com/7.x/bottts/png?seed=${seed[index]}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf`
+}
+
 // To handle Google Sign-In callback
 const handleGoogleCallback = async (req, res) => {
   try {
@@ -44,7 +51,7 @@ const handleGoogleCallback = async (req, res) => {
     const googleId = payload['sub'];
     const email = payload['email'];
     const name = payload['name'];
-
+    const avatar = generateAvatar();
     // Check if user already exists in the database
     let user = await User.findOne({ googleId });
 
@@ -54,6 +61,7 @@ const handleGoogleCallback = async (req, res) => {
         googleId,
         name,
         email,
+        avatar
       });
       await user.save();
     }
@@ -63,8 +71,11 @@ const handleGoogleCallback = async (req, res) => {
       expiresIn: 86400, // expires in 24 hours
     });
 
+    // res.set('Authorization', `Bearer ${token}`);
+    // res.redirect(process.env.CLIENT_URL);
+    res.status(201).json({ message: 'Google login successful. You are now authenticated.', token });
     // Redirect user to client URL with token as query parameter
-    res.redirect(`${process.env.CLIENT_URL}?token=${token}`)
+    // res.redirect(`${process.env.CLIENT_URL}?token=${token}`)
   } catch (error) {
     console.error('Error verifying ID token:', error);
     res.status(500).json({ message: 'Failed to verify ID token', details: error.message });
@@ -112,4 +123,4 @@ const googleLogout = async (req, res) => {
 };
 
 
-module.exports = { googleLogin, handleGoogleCallback, getUserProfile, googleLogout };
+module.exports = { googleLogin, handleGoogleCallback, getUserProfile, deleteProfile, googleLogout };
