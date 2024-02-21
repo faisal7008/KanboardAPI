@@ -27,6 +27,11 @@ app.listen(port, () => {
 // Connect to the database
 connectDB();
 
+// Welcome message route
+app.get("/", (req, res) => {
+  res.send("Welcome to Kanboard API");
+});
+
 // Define rate limiting options
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
